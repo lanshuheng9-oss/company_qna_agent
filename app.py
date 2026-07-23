@@ -1,4 +1,4 @@
-# app.py (终极融合版：RAG 检索 + 专属 Prompt + 悬浮传图 + 云端自动建库)
+# app.py 
 import streamlit as st
 import os
 import tempfile
@@ -16,25 +16,24 @@ from prompts.system_prompt import QNA_SYSTEM_PROMPT
 # 1. 页面基本配置与大标题
 # ==========================================
 st.set_page_config(
-    page_title="集团材料送检助手",
+    page_title="健研检测客服",
     page_icon="🛡️",
     layout="centered"
 )
 
-st.title("🛡️ 集团材料送检助手")
-st.markdown("您好！您不仅可以咨询送检规范，还可以上传页面截图，我来帮您解答！")
+st.title("🛡️ 健研检测客服")
+st.markdown("健研检测客服回答你的问题")
 
 # ==========================================
 # 2. 初始化系统（支持云端自动建库）
 # ==========================================
 @st.cache_resource
-def init_rag_system():
+def init_rag_system(show_spinner=False):
     embeddings = DashScopeEmbeddings(dashscope_api_key=settings.DASHSCOPE_API_KEY)
     persist_directory = "./chroma_db"
     
     # 如果没检测到数据库（比如在云端），就自动现场搭一个
     if not os.path.exists(persist_directory) or not os.listdir(persist_directory):
-        st.info("检测到云端知识库尚未初始化，正在自动加载 data/ 目录下的文档...")
         loader = DirectoryLoader(
             './data', 
             glob="**/*.md", 
@@ -75,7 +74,7 @@ with st.popover("🖼️ 点击上传截图"):
 # ==========================================
 # 5. 核心对话与检索生成逻辑
 # ==========================================
-if user_query := st.chat_input("请输入您的送检问题，或结合截图提问..."):
+if user_query := st.chat_input("问问AI吧..."):
     
     # 5.1 处理图片保存
     image_temp_path = None

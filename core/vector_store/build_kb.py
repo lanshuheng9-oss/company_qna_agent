@@ -15,7 +15,7 @@ def build_vector_database():
     
     # 核心修改：将 glob 改为匹配 "**/*.md"
     loader = DirectoryLoader(
-        './data', 
+        './data/processed',     # 重点：只读取加工后的热数据目录
         glob="**/*.md", 
         loader_cls=TextLoader, 
         loader_kwargs={'encoding': 'utf-8'}
