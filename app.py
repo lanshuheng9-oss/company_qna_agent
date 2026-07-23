@@ -41,7 +41,7 @@ def init_rag_system(show_spinner=False):
             loader_kwargs={'encoding': 'utf-8'}
         )
         documents = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
         chunks = text_splitter.split_documents(documents)
         vectorstore = Chroma.from_documents(documents=chunks, embedding=embeddings, persist_directory=persist_directory)
     else:
@@ -93,10 +93,10 @@ if user_query := st.chat_input("问问AI吧..."):
 
     # 5.3 开启大模型推理
     with st.chat_message("assistant"):
-        with st.spinner("正在查阅知识库并生成解答，请稍候..."):
+        with st.spinner("思考中，请稍候..."):
             try:
                 # 【关键修复】先去本地 Chroma 数据库里查资料！
-                docs = vectorstore.similarity_search(user_query, k=3)
+                docs = vectorstore.similarity_search(user_query, k=5)
                 context_text = "\n\n".join([doc.page_content for doc in docs])
                 
                 # 【关键修复】将你的专属 Prompt、检索到的规范资料、以及用户问题，拼装成最终的完整 Prompt
@@ -126,7 +126,9 @@ if user_query := st.chat_input("问问AI吧..."):
                 response = MultiModalConversation.call(
                     model='qwen-vl-max', 
                     messages=messages,
-                    api_key=settings.DASHSCOPE_API_KEY
+                    api_key=settings.DASHSCOPE_API_KEY,
+                    temperature=0.01, 
+                    top_p=0.1
                 )
                 
                 if response.status_code == 200:
