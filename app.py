@@ -58,18 +58,36 @@ if user_query := st.chat_input("问问AI吧..."):
             st.image(image_temp_path, width=250)
         st.markdown(user_query)
 
-    # 4.3 开启大模型推理
+    # 4.3 开启大模型推理 (🚀 流式升级版 + 智能等待动画 + 多轮历史记忆)
     with st.chat_message("assistant"):
-        with st.spinner("思考中，请稍候..."):
-            try:
-                # 【全新极简架构】
-                # 直接呼叫后台的智能路由，它会自动去 Chroma 查库、匹配 Prompt，并返回回答！
-                answer = ask_agent(user_query)
-                
-            except Exception as e:
-                answer = f"发生异常错误: {str(e)}"
+        try:
+            # 1. 创建一个空的占位符，先显示“思考中”提示
+            thinking_placeholder = st.empty()
+            thinking_placeholder.markdown("**思考中...**")
             
-            st.markdown(answer)
+            # 2. 提取除当前问题外的所有历史对话记录
+            chat_history = st.session_state.messages[:-1]
             
-    # 保存助手回答
-    st.session_state.messages.append({"role": "assistant", "content": answer, "image_path": None})
+            # 3. 呼叫后端大脑并传入 history
+            answer_generator = ask_agent(user_query, history=chat_history)
+            
+            # 4. 编写“首字拦截器”
+            def intercept_stream(generator):
+                is_first_chunk = True
+                for chunk in generator:
+                    if is_first_chunk:
+                        # 💥 拦截到第一个字时，瞬间清空“思考中”提示！
+                        thinking_placeholder.empty()
+                        is_first_chunk = False
+                    yield chunk
+            
+            # 5. 使用 write_stream 渲染打字机效果
+            full_answer = st.write_stream(intercept_stream(answer_generator))
+            
+        except Exception as e:
+            thinking_placeholder.empty() # 报错时清空提示
+            full_answer = f"发生异常错误: {str(e)}"
+            st.markdown(full_answer)
+            
+    # 保存助手完整的回答到历史记录中
+    st.session_state.messages.append({"role": "assistant", "content": full_answer, "image_path": None})
