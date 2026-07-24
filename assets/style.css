@@ -1,0 +1,12 @@
+/* 全局背景微调 */
+.stApp {
+    background-color: #f7f9fb;
+}
+
+/* 优化输入框圆角与阴影 */
+[data-testid="stChatInput"] {
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
