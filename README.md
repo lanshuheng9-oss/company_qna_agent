@@ -1,38 +1,50 @@
-# 健研集团客服项目
-
-本项目是一个基于 RAG（检索增强生成）架构的 AI 智能体应用，专为处理集团材料送检业务咨询、对公账务及缴费结算等问答场景而设计。
-
-## 项目目录结构
-
-```text
-company_qna_agent/
-├── api/                   # 外部接口层（备用：未来若提供 API 给内部其他系统调用）
-├── config/                # 配置中心
-│   └── config.py          # 全局配置读取（如大模型参数、各类文件路径设置等）
-├── core/                  # 核心业务逻辑层
-│   ├── document_parser/   # 文档解析模块（处理底层文档的切分、向量化前置逻辑）
-│   ├── llm_engine/        # 大模型通信层
-│   │   └── chat_model.py  # 负责与底层大模型 API（如阿里百炼）进行通信交互
-│   ├── vector_store/      # 向量数据库操作层
-│   │   └── build_kb.py    # 负责构建、管理和加载 Chroma 本地向量知识库
-│   └── query_agent.py     # 核心调度代理，统筹 RAG 检索与对话生成的完整链路
-├── data/                  # 数据资产库（实施数据冷热分离）
-│   ├── processed/         # 热数据：清洗转换后的标准化知识库（供 AI 直接读取）
-│   │   └── AI业务问答.md    # 自动生成的纯净版 Markdown 知识库文件
-│   └── raw/               # 冷数据：存放业务部门提供的原始表格（源数据，不直接修改）
-│       ├── AI业务问答汇总-20260616.xlsx
-│       └── 健研检测材料送检业务受理指南(2026修订).xlsx
-├── prompts/               # 提示词工程管理
-│   └── system_prompt.py   # 存放 AI 客服的角色设定、行为约束、送检规范和输出格式
-├── tests/                 # 自动化测试目录（存放核心组件的单元测试脚本）
-├── utils/                 # 通用工具箱与数据流水线
-│   ├── parsers/           # 独立的数据解析器模块（解耦设计）
-│   │   ├── __init__.py    
-│   │   ├── guide_parser.py # 专门清洗《业务受理指南》报表的独立脚本
-│   │   └── qa_parser.py   # 专门清洗《AI业务问答》报表的独立脚本
-│   └── data_pipeline.py   # 数据流水线总台：一键运行所有解析器生成 md 文件
-├── .env                   # 环境变量配置文件（存放 API Key，不上交 GitHub）
-├── .gitignore             # Git 忽略清单（防止 venv、数据库和敏感信息传到云端）
-├── app.py                 # Streamlit 网页端主入口文件
-├── README.md              # 项目说明文档（本文件）
-└── requirements.txt       # 项目依赖清单（云端服务器自动部署的“购物清单”）
+COMPANY_QNA_AGENT/
+│
+├── api/                    # 外部 API 接口或服务集成模块
+├── chroma_db/              # Chroma 向量数据库持久化存储目录
+│   ├── 34285c64-.../       # 向量索引二进制分片数据
+│   └── chroma.sqlite3      # 向量数据库元数据 SQLite 记录文件
+│
+├── config/                 # 系统全局配置
+│   └── config.py           # 读取环境变量与核心参数配置
+│
+├── core/                   # 核心业务逻辑层
+│   ├── document_parser/    # 文档解析核心逻辑
+│   ├── llm_engine/         # 大模型交互引擎
+│   │   └── chat_model.py   # 统一的大模型调用与生成封装
+│   ├── vector_store/       # 向量库构建脚本
+│   │   ├── build_all.py    # 一键重建所有知识库脚本
+│   │   ├── build_guide.py  # 受理指南向量化构建
+│   │   └── build_qa.py     # 业务问答向量化构建
+│   └── query_agent.py      # 主智能体核心逻辑（含智能路由与检索）
+│
+├── data/                   # 数据资产管理中心
+│   ├── processed/          # 清洗后的中间文本资产
+│   │   ├── 检测量受理指南.md # 转化后的结构化大白话文本
+│   │   └── AI业务问答.md   # 转化后的问答库标准文本
+│   └── raw/                # 原始业务输入文件
+│       ├── 健研检测材料送检业务受理指南...xlsx # 原始送检指南表格
+│       └── AI业务问答汇总...xlsx               # 原始问答库表格
+│
+├── prompts/                # 提示词工程管理中心
+│   ├── guide_prompt.py     # 受理指南专属 Prompt 模板
+│   ├── qa_prompt.py        # 业务问答专属 Prompt 模板
+│   └── system_prompt.py    # 系统通用基底 Prompt
+│
+├── tests/                  # 自动化测试与验证脚本
+│   ├── test_chat.py        # 对话功能单元测试
+│   └── test_llm.py         # 大模型连通性测试
+│
+├── utils/                  # 工具函数与数据流水线
+│   ├── parsers/            # 表格专项解析器
+│   │   ├── __init__.py
+│   │   ├── guide_parser.py # 处理指南 Excel 合并单元格与降维
+│   │   └── qa_parser.py    # 处理问答库表格清洗
+│   └── data_pipeline.py    # 数据清洗与转换总流水线
+│
+├── venv/                   # Python 虚拟环境目录
+├── .env                    # 本地敏感环境变量配置（如 API Key）
+├── .gitignore              # Git 版本控制忽略文件
+├── app.py                  # Streamlit 前端交互界面应用
+├── README.md               # 项目说明文档
+└── requirements.txt        # 项目 Python 依赖包清单
