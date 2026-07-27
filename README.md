@@ -1,6 +1,5 @@
-## 📂 项目文件体系 (Project Directory Structure)
+## 项目文件体系
 
-本项目采用模块化分层设计，整体架构清晰，便于扩展与维护。以下是完整的目录结构及核心文件说明：
 
 ```text
 COMPANY_QNA_AGENT/

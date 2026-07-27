@@ -12,7 +12,7 @@ class Settings:
     BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     
     # 默认调用的模型名称（推荐通义千问 qwen-plus 或 qwen-turbo）
-    DEFAULT_MODEL: str = "qwen-max"
+    DEFAULT_MODEL: str = "qwen-vl-max"
 
 settings = Settings()
 
